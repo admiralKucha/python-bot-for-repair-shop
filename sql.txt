@@ -1,0 +1,69 @@
+DROP TABLE IF EXISTS all_users CASCADE;
+CREATE TABLE all_users(
+id Serial Primary key,
+username varchar(40) NOT NULL UNIQUE,
+password varchar(40) NOT NULL,
+user_group char(1) NOT NULL);
+
+
+DROP TABLE IF EXISTS customer CASCADE;
+CREATE TABLE customer(
+name varchar(100) NOT NULL,
+address varchar(100) NOT NULL,
+phone_number varchar(20) NOT NULL,
+global_id int NOT NULL,
+PRIMARY KEY (name, address),
+FOREIGN KEY (global_id) REFERENCES all_users(id) ON DELETE CASCADE);
+
+
+DROP TABLE IF EXISTS service CASCADE;
+CREATE TABLE service(
+name varchar(100) NOT NULL,
+description text DEFAULT NULL,
+time_work varchar(50) DEFAULT NULL,
+PRIMARY KEY (name));
+
+DROP TABLE IF EXISTS company CASCADE;
+CREATE TABLE company(
+name varchar(100) NOT NULL,
+address varchar(100) NOT NULL,
+phone_number varchar(20) NOT NULL,
+owner varchar(50) NOT NULL,
+time_work varchar(50) NOT NULL,
+global_id int NOT NULL,
+PRIMARY KEY (name, address),
+FOREIGN KEY (global_id) REFERENCES all_users(id) ON DELETE CASCADE);
+
+
+DROP TABLE IF EXISTS orders CASCADE;
+CREATE TABLE orders(
+name_customer varchar(100) NOT NULL,
+address_customer varchar(100) NOT NULL,
+name_service varchar(100) NOT NULL,
+name_company varchar(100) NOT NULL,
+name_address varchar(100) NOT NULL,
+PRIMARY KEY (name_customer, address_customer, name_service, name_company, name_address),
+FOREIGN KEY (name_customer, address_customer) REFERENCES customer(name, address) ON DELETE CASCADE,
+FOREIGN KEY (name_company, name_address) REFERENCES company(name, address) ON DELETE CASCADE,
+FOREIGN KEY (name_service) REFERENCES service(name) ON DELETE CASCADE);
+
+DROP TABLE IF EXISTS prices CASCADE;
+CREATE TABLE prices(
+price int NOT NULL,
+name_company varchar(100) NOT NULL,
+address varchar(100) NOT NULL,
+PRIMARY KEY (price, name_company, address),
+FOREIGN KEY (name_company, address) REFERENCES company(name, address) ON DELETE CASCADE);
+
+DROP TABLE IF EXISTS worker CASCADE;
+CREATE TABLE worker(
+name varchar(100) NOT NULL,
+address varchar(100) NOT NULL,
+name_company varchar(100) NOT NULL,
+name_address varchar(100) NOT NULL,
+phone_number varchar(20) NOT NULL,
+time_work varchar(50) NOT NULL,
+global_id int NOT NULL,
+PRIMARY KEY (name, address, name_company, name_address),
+FOREIGN KEY (name_company, address) REFERENCES company(name, address) ON DELETE CASCADE,
+FOREIGN KEY (global_id) REFERENCES all_users(id) ON DELETE CASCADE);
