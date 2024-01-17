@@ -25,7 +25,6 @@ class PostgresDB:
             self.cursor.close()
             self.connection.close()
 
-
     def create_new_user(self, username, password, user_group):
         # выводим всех неподтвержденных пользователей
         res = dict()
