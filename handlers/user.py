@@ -1,6 +1,5 @@
 from aiogram import Router
 from aiogram.filters import Command, StateFilter
-from aiogram.fsm.context import FSMContext
 from aiogram import types
 
 router = Router()
@@ -17,6 +16,3 @@ async def cmd_auth(message: types.Message):
     await message.answer("Что желаете?\n/create - создать аккаунт\n/login - авторизоваться")
 
 
-@router.message(StateFilter(None), Command("list"))
-async def show_list(message: types.Message, state: FSMContext):
-    await message.answer("Какую ")

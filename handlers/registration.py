@@ -32,7 +32,7 @@ async def cmd_address_user(message: types.Message, state: FSMContext):
 
 
 @router.message(Registration.user_phone_number)
-async def cmd_address_user(message: types.Message, state: FSMContext):
+async def cmd_phone_number_user(message: types.Message, state: FSMContext):
     await message.answer("Введите тип пользователя\n"
                          "1 - заказчик\n"
                          "2 - компания")
@@ -41,7 +41,7 @@ async def cmd_address_user(message: types.Message, state: FSMContext):
 
 
 @router.message(Registration.user_group)
-async def cmd_address_user(message: types.Message, state: FSMContext):
+async def cmd_group_user(message: types.Message, state: FSMContext):
     text = message.text
     dict_about_reg[message.from_user.id]['user_group'] = text
     if text == '1':
@@ -54,28 +54,28 @@ async def cmd_address_user(message: types.Message, state: FSMContext):
 
 
 @router.message(Registration.company_name)
-async def cmd_address_user(message: types.Message, state: FSMContext):
+async def cmd_company_user(message: types.Message, state: FSMContext):
     await message.answer("Введите график работы")
     await state.set_state(Registration.company_schedule)
     dict_about_reg[message.from_user.id]['name'] = message.text
 
 
 @router.message(Registration.company_schedule)
-async def cmd_address_user(message: types.Message, state: FSMContext):
+async def cmd_schedule_user(message: types.Message, state: FSMContext):
     await message.answer("Придумайте логин")
     await state.set_state(Registration.user_create_login)
     dict_about_reg[message.from_user.id]['time_work'] = message.text
 
 
 @router.message(Registration.user_create_login)
-async def cmd_address_user(message: types.Message, state: FSMContext):
+async def cmd_login_user(message: types.Message, state: FSMContext):
     await message.answer("Придумайте пароль")
     await state.set_state(Registration.user_create_password)
     dict_about_reg[message.from_user.id]['login'] = message.text
 
 
 @router.message(Registration.user_create_password)
-async def cmd_address_user(message: types.Message, state: FSMContext):
+async def cmd_password_user(message: types.Message, state: FSMContext):
     await state.set_state(None)
     user_group = dict_about_reg[message.from_user.id]['user_group']
     dict_about_reg[message.from_user.id]['password'] = message.text

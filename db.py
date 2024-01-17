@@ -117,3 +117,33 @@ class PostgresDB:
         finally:
             self.close_connection()
             return res
+
+    def show_table(self, table):
+        # выводим всех неподтвержденных пользователей
+        res = dict()
+        try:
+            self.connect()
+            str_exec = f"SELECT * FROM {table};"
+            self.cursor.execute(str_exec)
+            res_values = self.cursor.fetchall()
+
+            str_exec = f"SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{table}';"
+            self.cursor.execute(str_exec)
+            res_columns = self.cursor.fetchall()
+            res_columns = [el[0] for el in res_columns]
+
+            if len(res_values) == 0:
+                res['status'] = False
+                res['data'] = "Таблица пустая"
+            else:
+                res['status'] = True
+                res['data'] = res_values
+                res['columns'] = res_columns
+
+        except (Exception, Error) as error:
+            res['status'] = False
+            res['data'] = "Ошибка при выдачи таблицы"
+            self.close_connection()
+
+        finally:
+            return res
