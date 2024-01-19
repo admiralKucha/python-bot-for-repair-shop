@@ -51,9 +51,9 @@ class PostgresDB:
         except (Exception, Error) as error:
             res['status'] = False
             res['message'] = "Ошибка при создание аккаунта"
-            self.close_connection()
 
         finally:
+            self.close_connection()
             return res
 
     def create_customer(self, name, address, phone_number, global_id):
@@ -143,7 +143,31 @@ class PostgresDB:
         except (Exception, Error) as error:
             res['status'] = False
             res['data'] = "Ошибка при выдачи таблицы"
-            self.close_connection()
 
         finally:
+            self.close_connection()
+            return res
+
+    def auth(self, username, password):
+        # выводим всех неподтвержденных пользователей
+        res = dict()
+        try:
+            self.connect()
+            str_exec = f"SELECT user_group FROM all_users WHERE username = '{username}' AND password = '{password}';"
+            self.cursor.execute(str_exec)
+            res_values = self.cursor.fetchone()
+
+            if res_values is None:
+                res['status'] = False
+                res['data'] = "Пользователь не найден"
+            else:
+                res['status'] = True
+                res['data'] = res_values[0]
+
+        except (Exception, Error) as error:
+            res['status'] = False
+            res['data'] = "Ошибка при выдачи таблицы"
+
+        finally:
+            self.close_connection()
             return res
