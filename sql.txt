@@ -50,9 +50,11 @@ FOREIGN KEY (name_service) REFERENCES service(name) ON DELETE CASCADE);
 DROP TABLE IF EXISTS prices CASCADE;
 CREATE TABLE prices(
 price int NOT NULL,
+name_service varchar(100) NOT NULL,
 name_company varchar(100) NOT NULL,
 address varchar(100) NOT NULL,
-PRIMARY KEY (price, name_company, address),
+PRIMARY KEY (price, name_service, name_company, address),
+FOREIGN KEY (name_service) REFERENCES service(name) ON DELETE CASCADE,
 FOREIGN KEY (name_company, address) REFERENCES company(name, address) ON DELETE CASCADE);
 
 DROP TABLE IF EXISTS worker CASCADE;

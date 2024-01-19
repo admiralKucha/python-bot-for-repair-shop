@@ -171,3 +171,50 @@ class PostgresDB:
         finally:
             self.close_connection()
             return res
+
+    def list_of_service(self):
+        # выводим всех неподтвержденных пользователей
+        res = dict()
+        try:
+            self.connect()
+            str_exec = f"SELECT name_service FROM prices;"
+            self.cursor.execute(str_exec)
+            res_temp = self.cursor.fetchall()
+            if len(res_temp) == 0:
+                res['status'] = False
+                res['data'] = "Нет услуг"
+            else:
+                res['status'] = True
+                res['data'] = res_temp
+
+        except (Exception, Error) as error:
+            res['status'] = False
+            res['data'] = "Ошибка при выдачи таблицы"
+
+        finally:
+            self.close_connection()
+            return res
+
+    def list_of_prices(self, service):
+        # выводим всех неподтвержденных пользователей
+        res = dict()
+        try:
+            self.connect()
+            str_exec = f"SELECT name_company, price FROM prices WHERE name_service ='{service}';"
+            self.cursor.execute(str_exec)
+            res_temp = self.cursor.fetchall()
+            if len(res_temp) == 0:
+                res['status'] = False
+                res['data'] = "Нет расценок"
+            else:
+                res['status'] = True
+                res['data'] = res_temp
+
+        except (Exception, Error) as error:
+            res['status'] = False
+            res['data'] = "Ошибка при выдачи таблицы"
+
+        finally:
+            self.close_connection()
+            return res
+

@@ -1,6 +1,7 @@
 from aiogram import Router
 from aiogram.filters import Command, StateFilter
 from aiogram import types
+from init import database
 
 router = Router()
 
@@ -14,5 +15,6 @@ async def cmd_start(message: types.Message):
 @router.message(StateFilter(None), Command("auth"))
 async def cmd_auth(message: types.Message):
     await message.answer("Что желаете?\n/create - создать аккаунт\n/login - авторизоваться")
+
 
 
