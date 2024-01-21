@@ -80,6 +80,7 @@ class PostgresDB:
                 # если все удачно, то запоминаем результат
                 res['status'] = True
                 res['message'] = "Пользователь создан"
+                res['data'] = [name, address]
 
         except (Exception, Error) as error:
             print(error)
@@ -106,6 +107,43 @@ class PostgresDB:
                 str_exec = str_exec + f'INSERT INTO company (name, address, phone_number, owner, time_work, global_id) '
                 str_exec = str_exec + f"VALUES ('{name}', '{address}', '{phone_number}'," \
                                       f" '{owner}', '{time_work}', '{global_id}');"
+
+                self.cursor.execute(str_exec)
+                self.connection.commit()
+
+                # если все удачно, то запоминаем результат
+                res['status'] = True
+                res['message'] = "Пользователь создан"
+                res['data'] = [name, address]
+
+        except (Exception, Error) as error:
+            print(error)
+            res['status'] = False
+            res['message'] = "Ошибка при создание аккаунта"
+
+        finally:
+            self.close_connection()
+            return res
+
+    def create_worker(self, name, address, name_company, name_address,  phone_number, time_work, global_id):
+        # выводим всех неподтвержденных пользователей
+        res = dict()
+        try:
+            self.connect()
+            str_exec = f"SELECT EXISTS (SELECT * FROM worker" \
+                       f" WHERE name = '{name}' AND address = '{address}'" \
+                       f" AND name_company = '{name_company}' AND name_address = '{name_address}');"
+            self.cursor.execute(str_exec)
+
+            if self.cursor.fetchone()[0]:
+                res['status'] = False
+                res['message'] = "Пользователь с такими данными существует"
+            else:
+                str_exec = ""
+                str_exec = str_exec + f'INSERT INTO worker (name, address, name_company, name_address,' \
+                                      f' phone_number, time_work, global_id) '
+                str_exec = str_exec + f"VALUES ('{name}', '{address}', '{name_company}', '{name_address}', " \
+                                      f" '{phone_number}', '{time_work}', '{global_id}');"
 
                 self.cursor.execute(str_exec)
                 self.connection.commit()

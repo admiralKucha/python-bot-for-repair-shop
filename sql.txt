@@ -67,5 +67,5 @@ phone_number varchar(20) NOT NULL,
 time_work varchar(50) NOT NULL,
 global_id int NOT NULL,
 PRIMARY KEY (name, address, name_company, name_address),
-FOREIGN KEY (name_company, address) REFERENCES company(name, address) ON DELETE CASCADE,
+FOREIGN KEY (name_company, name_address) REFERENCES company(name, address) ON DELETE CASCADE,
 FOREIGN KEY (global_id) REFERENCES all_users(id) ON DELETE CASCADE);

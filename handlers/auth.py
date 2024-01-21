@@ -34,12 +34,20 @@ async def input_password(message: types.Message, state: FSMContext):
     if not res_temp['status']:
         await state.set_state(None)
         await message.answer(res_temp['data'])
+        await message.answer("Здравствуйте! У бота есть 3 функции для вас\n/price - посмотреть цены \n/auth - войти в "
+                             "личный кабинет \n/list - посмотреть определенную таблицу")
         return
+    
     else:
         match res_temp['data'][0]:
             case "1":
                 await state.set_state(Customer.account)
                 customer_dict[message.from_user.id] = res_temp['data'][1]
+                await message.answer("Вы вошли в свой аккаунт\n"
+                                     "Что желаете сделать?\n"
+                                     "/info - посмотреть свои данные\n"
+                                     "/service - посмотреть услуги\n"
+                                     "/exit - выйти из аккаунта")
             case "2":
                 await state.set_state(Company.account)
                 company_dict[message.from_user.id] = res_temp['data'][1]
@@ -54,3 +62,8 @@ async def input_password(message: types.Message, state: FSMContext):
             case "3":
                 await state.set_state(Worker.account)
                 worker_dict[message.from_user.id] = res_temp['data'][1]
+                await message.answer("Вы вошли в свой аккаунт\n"
+                                     "Что желаете сделать?\n"
+                                     "/info - посмотреть свои данные\n"
+                                     "/orders - посмотреть заказы\n"
+                                     "/exit - выйти из аккаунта")

@@ -93,5 +93,33 @@ async def account_company_create_worker(message: types.Message, state: FSMContex
     dict_worker[message.from_user.id]['password'] = message.text
 
     # начать писать здесь
-    await state.set_state(Company.account)
+    user_group = 3
+    res_temp = database.create_new_user(dict_worker[message.from_user.id]['login'],
+                                        dict_worker[message.from_user.id]['password'],
+                                        user_group)
 
+    if not res_temp['status']:  # возникла ошибки
+        await message.answer(res_temp['message'])
+
+    else:
+        global_id = res_temp['data']
+        name_company, address_company = company_dict[message.from_user.id]
+        res_temp = database.create_worker(dict_worker[message.from_user.id]['name'],
+                                          dict_worker[message.from_user.id]['address'],
+                                          name_company,
+                                          address_company,
+                                          dict_worker[message.from_user.id]['phone_number'],
+                                          dict_worker[message.from_user.id]['time_work'],
+                                          global_id)
+
+        await message.answer(res_temp['message'])
+
+    await message.answer("Что желаете сделать далее?\n"
+                         "/info - посмотреть свои данные\n"
+                         "/service - посмотреть свои услуги\n"
+                         "/orders - посмотреть заказы\n"
+                         "/worker - посмотреть своих рабочих\n"
+                         "/exit - выйти из аккаунта")
+
+    dict_worker.pop(message.from_user.id, None)
+    await state.set_state(Company.account)

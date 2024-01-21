@@ -3,7 +3,7 @@ from aiogram.filters import Command, StateFilter
 from aiogram.fsm.context import FSMContext
 from states import Registration, Customer, Company
 from aiogram import types
-from init import database
+from init import database, company_dict, customer_dict
 
 router = Router()
 # информация для регистрация
@@ -85,6 +85,8 @@ async def cmd_password_user(message: types.Message, state: FSMContext):
 
     if not res_temp['status']:  # возникла ошибки
         await message.answer(res_temp['message'])
+        await message.answer("Здравствуйте! У бота есть 3 функции для вас\n/price - посмотреть цены \n/auth - войти в "
+                             "личный кабинет \n/list - посмотреть определенную таблицу")
 
     else:
         global_id = res_temp['data']
@@ -93,8 +95,21 @@ async def cmd_password_user(message: types.Message, state: FSMContext):
                                                 dict_about_reg[message.from_user.id]['address'],
                                                 dict_about_reg[message.from_user.id]['phone_number'],
                                                 global_id)
+            if not res_temp['status']:
+                await message.answer(res_temp['message'])
+                await message.answer(
+                    "Здравствуйте! У бота есть 3 функции для вас\n/price - посмотреть цены \n/auth - войти в "
+                    "личный кабинет \n/list - посмотреть определенную таблицу")
+                return
+
             await state.set_state(Customer.account)
             await message.answer(res_temp['message'])
+            customer_dict[message.from_user.id] = res_temp['data']
+            await message.answer("Вы вошли в свой аккаунт\n"
+                                 "Что желаете сделать?\n"
+                                 "/info - посмотреть свои данные\n"
+                                 "/service - посмотреть услуги\n"
+                                 "/exit - выйти из аккаунта")
         else:
             res_temp = database.create_company(dict_about_reg[message.from_user.id]['name'],
                                                dict_about_reg[message.from_user.id]['address'],
@@ -102,8 +117,13 @@ async def cmd_password_user(message: types.Message, state: FSMContext):
                                                dict_about_reg[message.from_user.id]['owner'],
                                                dict_about_reg[message.from_user.id]['time_work'],
                                                global_id)
+            if not res_temp['status']:
+                await message.answer(res_temp['message'])
+                return
+
             await state.set_state(Company.account)
             await message.answer(res_temp['message'])
+            company_dict[message.from_user.id] = res_temp['data']
             await message.answer("Вы вошли в свой аккаунт\n"
                                  "Что желаете сделать?\n"
                                  "/info - посмотреть свои данные\n"
