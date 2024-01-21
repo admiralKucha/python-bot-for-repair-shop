@@ -18,14 +18,21 @@ async def choose_table(message: types.Message, state: FSMContext):
                          "/5 pages\n"
                          "/6 prices\n"
                          "/7 service\n"
-                         "/8 worker")
+                         "/8 worker\n"
+                         "/exit")
 
     await state.set_state(Tables.choose_table)
 
 
+@router.message(StateFilter(Tables.choose_table), Command("exit"))
+async def exit_show_table(message: types.Message, state: FSMContext):
+    await state.set_state(None)
+    await message.answer("Здравствуйте! У бота есть 3 функции для вас\n/price - посмотреть цены \n/auth - войти в "
+                         "личный кабинет \n/list - посмотреть определенную таблицу")
+
+
 @router.message(Tables.choose_table)
 async def show_table(message: types.Message, state: FSMContext):
-    await state.set_state(None)
     text = "error"
     res = dict()
     match message.text:
@@ -61,4 +68,17 @@ async def show_table(message: types.Message, state: FSMContext):
         for string in strings:
             string = ", ".join([str(el) for el in string])
             await message.answer(string)
+
+    await message.answer("Какую таблицу вы хотите видеть далее?\n"
+                         "/1 all_users\n"
+                         "/2 company\n"
+                         "/3 customer\n"
+                         "/4 orders\n"
+                         "/5 pages\n"
+                         "/6 prices\n"
+                         "/7 service\n"
+                         "/8 worker\n"
+                         "/exit")
+
+
 

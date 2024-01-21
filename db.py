@@ -42,6 +42,7 @@ class PostgresDB:
                 str_exec = str_exec + f"VALUES ('{username}', '{password}', '{user_group}') RETURNING id;"
 
                 self.cursor.execute(str_exec)
+                self.connection.commit()
                 student_id = self.cursor.fetchone()[0]
 
                 # если все удачно, то запоминаем результат
@@ -49,6 +50,7 @@ class PostgresDB:
                 res['data'] = student_id
 
         except (Exception, Error) as error:
+            print(error)
             res['status'] = False
             res['message'] = "Ошибка при создание аккаунта"
 
@@ -60,6 +62,7 @@ class PostgresDB:
         # выводим всех неподтвержденных пользователей
         res = dict()
         try:
+            self.connect()
             str_exec = f"SELECT EXISTS (SELECT * FROM customer WHERE name = '{name}' AND address = '{address}');"
             self.cursor.execute(str_exec)
 
@@ -79,6 +82,7 @@ class PostgresDB:
                 res['message'] = "Пользователь создан"
 
         except (Exception, Error) as error:
+            print(error)
             res['status'] = False
             res['message'] = "Ошибка при создание аккаунта"
 
@@ -90,6 +94,7 @@ class PostgresDB:
         # выводим всех неподтвержденных пользователей
         res = dict()
         try:
+            self.connect()
             str_exec = f"SELECT EXISTS (SELECT * FROM company WHERE name = '{name}' AND address = '{address}');"
             self.cursor.execute(str_exec)
 

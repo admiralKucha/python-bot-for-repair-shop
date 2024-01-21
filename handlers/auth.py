@@ -2,7 +2,7 @@ from aiogram import Router
 from aiogram.filters import Command, StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram import types
-from states import Auth
+from states import Auth, Company, Customer, Worker
 from init import database
 
 router = Router()
@@ -36,7 +36,12 @@ async def input_password(message: types.Message, state: FSMContext):
         await message.answer(rest_temp['data'])
         return
     else:
-        await state.set_state(None)
-        pass
+        match rest_temp['data']:
+            case 1:
+                await state.set_state(Customer.account)
+            case 2:
+                await state.set_state(Company.account)
+            case 3:
+                await state.set_state(Worker.account)
 
 

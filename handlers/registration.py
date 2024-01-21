@@ -1,7 +1,7 @@
 from aiogram import Router
 from aiogram.filters import Command, StateFilter
 from aiogram.fsm.context import FSMContext
-from states import Registration
+from states import Registration, Customer, Company
 from aiogram import types
 from init import database
 
@@ -93,6 +93,7 @@ async def cmd_password_user(message: types.Message, state: FSMContext):
                                                 dict_about_reg[message.from_user.id]['address'],
                                                 dict_about_reg[message.from_user.id]['phone_number'],
                                                 global_id)
+            await state.set_state(Customer.account)
             await message.answer(res_temp['message'])
         else:
             res_temp = database.create_company(dict_about_reg[message.from_user.id]['name'],
@@ -101,6 +102,7 @@ async def cmd_password_user(message: types.Message, state: FSMContext):
                                                dict_about_reg[message.from_user.id]['owner'],
                                                dict_about_reg[message.from_user.id]['time_work'],
                                                global_id)
+            await state.set_state(Company.account)
             await message.answer(res_temp['message'])
 
     dict_about_reg.pop(message.from_user.id, None)
