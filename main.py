@@ -2,7 +2,7 @@ import asyncio
 import logging
 from aiogram import Bot, Dispatcher
 from init import TOKEN
-from handlers import registration, user, show_tables, auth, price
+from handlers import registration, user, show_tables, auth, price, company
 
 # Включаем логирование, чтобы не пропустить важные сообщения
 logging.basicConfig(level=logging.INFO)
@@ -18,7 +18,8 @@ async def main():
                        user.router,
                        show_tables.router,
                        auth.router,
-                       price.router)
+                       price.router,
+                       company.router)
     await dp.start_polling(bot)
 
 

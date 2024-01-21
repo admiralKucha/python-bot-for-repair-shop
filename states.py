@@ -52,17 +52,23 @@ class Price(StatesGroup):
 
 class Company(StatesGroup):
     account = State()
-
     # -Человек зашел в свой аккаунт и теперь имеет больше функций в зависимости от своей роли
+
+    worker_name = State()
+    worker_address = State()
+    worker_phone_number = State()
+    worker_time_work = State()
+    worker_login = State()
+    worker_password = State()
+    # -Компания создает работника, пишет все его данные, придумывает логин и пароль
 
 
 class Customer(StatesGroup):
     account = State()
-
     # -Человек зашел в свой аккаунт и теперь имеет больше функций в зависимости от своей роли
 
 
 class Worker(StatesGroup):
     account = State()
-
     # -Человек зашел в свой аккаунт и теперь имеет больше функций в зависимости от своей роли
+

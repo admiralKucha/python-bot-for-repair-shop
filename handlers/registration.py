@@ -104,5 +104,12 @@ async def cmd_password_user(message: types.Message, state: FSMContext):
                                                global_id)
             await state.set_state(Company.account)
             await message.answer(res_temp['message'])
+            await message.answer("Вы вошли в свой аккаунт\n"
+                                 "Что желаете сделать?\n"
+                                 "/info - посмотреть свои данные\n"
+                                 "/service - посмотреть свои услуги\n"
+                                 "/orders - посмотреть заказы\n"
+                                 "/worker - посмотреть своих рабочих\n"
+                                 "/exit - выйти из аккаунта")
 
     dict_about_reg.pop(message.from_user.id, None)

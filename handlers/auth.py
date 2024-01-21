@@ -3,7 +3,7 @@ from aiogram.filters import Command, StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram import types
 from states import Auth, Company, Customer, Worker
-from init import database
+from init import database, company_dict, worker_dict, customer_dict
 
 router = Router()
 user_dict = dict()
@@ -27,21 +27,30 @@ async def input_username(message: types.Message, state: FSMContext):
 async def input_password(message: types.Message, state: FSMContext):
     id_user = message.from_user.id
     user_dict[id_user]['password'] = message.text
-    rest_temp = database.auth(user_dict[id_user]['login'],
-                              user_dict[id_user]['password'])
+    res_temp = database.auth(user_dict[id_user]['login'],
+                             user_dict[id_user]['password'])
 
     user_dict.pop(id_user, None)
-    if not rest_temp['status']:
+    if not res_temp['status']:
         await state.set_state(None)
-        await message.answer(rest_temp['data'])
+        await message.answer(res_temp['data'])
         return
     else:
-        match rest_temp['data']:
-            case 1:
+        match res_temp['data'][0]:
+            case "1":
                 await state.set_state(Customer.account)
-            case 2:
+                customer_dict[message.from_user.id] = res_temp['data'][1]
+            case "2":
                 await state.set_state(Company.account)
-            case 3:
+                company_dict[message.from_user.id] = res_temp['data'][1]
+                await message.answer("Вы вошли в свой аккаунт\n"
+                                     "Что желаете сделать?\n"
+                                     "/info - посмотреть свои данные\n"
+                                     "/service - посмотреть свои услуги\n"
+                                     "/orders - посмотреть заказы\n"
+                                     "/worker - посмотреть своих рабочих\n"
+                                     "/exit - выйти из аккаунта")
+
+            case "3":
                 await state.set_state(Worker.account)
-
-
+                worker_dict[message.from_user.id] = res_temp['data'][1]

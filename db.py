@@ -158,18 +158,40 @@ class PostgresDB:
         res = dict()
         try:
             self.connect()
-            str_exec = f"SELECT user_group FROM all_users WHERE username = '{username}' AND password = '{password}';"
+            str_exec = f"SELECT user_group, id FROM all_users WHERE username = '{username}' AND password = '{password}';"
             self.cursor.execute(str_exec)
             res_values = self.cursor.fetchone()
-
             if res_values is None:
                 res['status'] = False
                 res['data'] = "Пользователь не найден"
+                return
+
+            res_values = list(res_values)
+            match res_values[0]:
+                case "1":
+                    str_exec = f"SELECT name, address" \
+                               f" FROM customer" \
+                               f" WHERE global_id = '{res_values[1]}';"
+                case "2":
+                    str_exec = f"SELECT name, address" \
+                               f" FROM company" \
+                               f" WHERE global_id = '{res_values[1]}';"
+                case "3":
+                    str_exec = f"SELECT name, address, name_company, name_address" \
+                               f" FROM worker" \
+                               f" WHERE global_id = '{res_values[1]}';"
+            self.cursor.execute(str_exec)
+            res_values[1] = self.cursor.fetchone()
+            if res_values is None:
+                res['status'] = False
+                res['data'] = "Пользователь не найден"
+                return
             else:
                 res['status'] = True
-                res['data'] = res_values[0]
+                res['data'] = res_values
 
         except (Exception, Error) as error:
+            print(error)
             res['status'] = False
             res['data'] = "Ошибка при выдачи таблицы"
 
@@ -222,4 +244,32 @@ class PostgresDB:
         finally:
             self.close_connection()
             return res
+
+    def list_of_workers(self, name_company, address):
+        # выводим всех неподтвержденных пользователей
+        res = dict()
+        try:
+            self.connect()
+            str_exec = f"SELECT name, address, phone_number, time_work" \
+                       f" FROM worker " \
+                       f" WHERE name_company ='{name_company}' AND name_address ='{address}';"
+            self.cursor.execute(str_exec)
+            res_temp = self.cursor.fetchall()
+
+            if len(res_temp) == 0:
+                res['status'] = False
+                res['data'] = "Нет работников"
+            else:
+                res['status'] = True
+                res['data'] = res_temp
+
+        except (Exception, Error) as error:
+            print(error)
+            res['status'] = False
+            res['data'] = "Ошибка при выдачи таблицы"
+
+        finally:
+            self.close_connection()
+            return res
+
 
