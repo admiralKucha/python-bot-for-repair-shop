@@ -10,6 +10,7 @@ router = Router()
 dict_worker = dict()
 dict_service = dict()
 dict_update_service = dict()
+dict_change = dict()
 
 
 @router.message(StateFilter(Company.account), Command("exit"))
@@ -209,7 +210,8 @@ async def account_company_add_service(message: types.Message, state: FSMContext)
     res_temp = res_temp['data']
     await message.answer("Выберите, какую хотите добавить/изменить:")
     for el in res_temp:
-        await message.answer(f"/{el[0]}")
+        await message.answer(f"{el[0]}")
+    await message.answer(f"Необходимо ввести услугу")
 
 
 @router.message(StateFilter(Company.service_all))
@@ -231,6 +233,7 @@ async def account_company_add_service_reg(message: types.Message, state: FSMCont
                                          address)
 
     await message.answer(res_temp['message'])
+    dict_update_service.pop(message.from_user.id, None)
     await message.answer("Что желаете сделать?\n"
                          "/create_new_service - Создать услугу, которой не было на рынке\n"
                          "/add_service - Обновить свое меню")
@@ -251,3 +254,58 @@ async def account_company_service(message: types.Message, state: FSMContext):
     await message.answer("Что желаете сделать?\n"
                          "/list_service - Посмотреть свои услуги\n"
                          "/create_service - Создать новую услугу")
+
+
+@router.message(StateFilter(Company.account), Command("info"))
+async def account_company_service(message: types.Message, state: FSMContext):
+    await message.answer("Что желаете сделать?\n"
+                         "/change_user - Изменить свои данные\n"
+                         "/delete_user - Удалить пользователя")
+
+
+@router.message(StateFilter(Company.account), Command("delete_user"))
+async def account_company_service(message: types.Message, state: FSMContext):
+    name_company, address = company_dict[message.from_user.id]
+    res_temp = database.delete_company(name_company, address)
+    await message.answer(res_temp['data'])
+
+    await state.set_state(None)
+    company_dict.pop(message.text, None)
+    await message.answer("Здравствуйте! У бота есть 3 функции для вас\n/price - посмотреть цены \n/auth - войти в "
+                         "личный кабинет \n/list - посмотреть определенную таблицу")
+
+
+@router.message(StateFilter(Company.account), Command("change_user"))
+async def account_company_service(message: types.Message, state: FSMContext):
+    await message.answer("Что желаете изменить?\n"
+                         "/phone_number - Номер телефона\n"
+                         "/owner - Имя владельца\n"
+                         "/time_work - Время работы")
+    await state.set_state(Company.change_info)
+    dict_change[message.from_user.id] = dict()
+
+
+@router.message(StateFilter(Company.change_info))
+async def account_company_service(message: types.Message, state: FSMContext):
+    await message.answer("Введите новую информацию")
+    await state.set_state(Company.change_info_put_value)
+    dict_change[message.from_user.id]['key'] = message.text[1:]
+
+
+@router.message(StateFilter(Company.change_info_put_value))
+async def account_company_service(message: types.Message, state: FSMContext):
+    name_company, address = company_dict[message.from_user.id]
+    await state.set_state(Company.account)
+    dict_change[message.from_user.id]['value'] = message.text
+    res_temp = database.change_info_company(dict_change[message.from_user.id]['key'],
+                                            dict_change[message.from_user.id]['value'],
+                                            name_company,
+                                            address)
+    await message.answer(res_temp['message'])
+
+    await message.answer("Что желаете сделать?\n"
+                         "/info - посмотреть свои данные\n"
+                         "/service - посмотреть свои услуги\n"
+                         "/orders - посмотреть заказы\n"
+                         "/worker - посмотреть своих рабочих\n"
+                         "/exit - выйти из аккаунта")

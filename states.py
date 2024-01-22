@@ -71,6 +71,10 @@ class Company(StatesGroup):
     service_price = State()
     # -Компания добавляет услугу к себе в меню, описывая расценки
 
+    change_info = State()
+    change_info_put_value = State()
+    # -Компания изменяет информацию о себе
+
 
 class Customer(StatesGroup):
     account = State()

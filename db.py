@@ -459,3 +459,66 @@ class PostgresDB:
         finally:
             self.close_connection()
             return res
+
+    def delete_company(self, name_company, address):
+        # выводим всех неподтвержденных пользователей
+        res = dict()
+        try:
+            self.connect()
+            str_exec = f"SELECT global_id " \
+                       f" FROM company " \
+                       f" WHERE name ='{name_company}' AND address ='{address}';"
+            self.cursor.execute(str_exec)
+            res_temp = self.cursor.fetchone()
+
+            if res_temp is None:
+                res['status'] = False
+                res['data'] = "Такого пользователя нет"
+            else:
+                str_exec = f'DELETE FROM all_users WHERE id = {res_temp[0]} RETURNING id;'
+                self.cursor.execute(str_exec)
+                self.connection.commit()
+                res['status'] = True
+                res['data'] = "Аккаунт удален"
+
+        except (Exception, Error) as error:
+            print(error)
+            res['status'] = False
+            res['data'] = "Ошибка при удалении аккаунта"
+
+        finally:
+            self.close_connection()
+            return res
+
+    def change_info_company(self, key, value, name, address):
+        res = dict()
+        try:
+            self.connect()
+            str_exec = f"SELECT EXISTS (SELECT * FROM company" \
+                       f" WHERE name = '{name}' AND" \
+                       f" address = '{address}');"
+            self.cursor.execute(str_exec)
+
+            if self.cursor.fetchone()[0]:
+                str_exec = f"UPDATE company SET {key} = '{value}'" \
+                       f" WHERE name = '{name}' AND" \
+                       f" address = '{address}';"
+                self.cursor.execute(str_exec)
+                self.connection.commit()
+                res['status'] = True
+                res['message'] = "Информация обновлена"
+
+            else:
+                res['status'] = False
+                res['message'] = "Такого пользователя не существует"
+
+        except (Exception, Error) as error:
+            print(error)
+            res['status'] = False
+            res['message'] = "Ошибка при создание услуги"
+
+        finally:
+            self.close_connection()
+            return res
+
+
