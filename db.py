@@ -125,7 +125,7 @@ class PostgresDB:
             self.close_connection()
             return res
 
-    def create_worker(self, name, address, name_company, name_address,  phone_number, time_work, global_id):
+    def create_worker(self, name, address, name_company, name_address, phone_number, time_work, global_id):
         # выводим всех неподтвержденных пользователей
         res = dict()
         try:
@@ -260,6 +260,29 @@ class PostgresDB:
             self.close_connection()
             return res
 
+    def list_of_all_service(self):
+        # выводим всех неподтвержденных пользователей
+        res = dict()
+        try:
+            self.connect()
+            str_exec = f"SELECT name FROM service;"
+            self.cursor.execute(str_exec)
+            res_temp = self.cursor.fetchall()
+            if len(res_temp) == 0:
+                res['status'] = False
+                res['data'] = "Нет услуг"
+            else:
+                res['status'] = True
+                res['data'] = res_temp
+
+        except (Exception, Error) as error:
+            res['status'] = False
+            res['data'] = "Ошибка при выдачи таблицы"
+
+        finally:
+            self.close_connection()
+            return res
+
     def list_of_prices(self, service):
         # выводим всех неподтвержденных пользователей
         res = dict()
@@ -310,4 +333,129 @@ class PostgresDB:
             self.close_connection()
             return res
 
+    def list_of_orders(self, name_company, address):
+        # выводим всех неподтвержденных пользователей
+        res = dict()
+        try:
+            self.connect()
+            str_exec = f"SELECT name_customer, address_customer, name_service " \
+                       f" FROM orders " \
+                       f" WHERE name_company ='{name_company}' AND name_address ='{address}';"
+            self.cursor.execute(str_exec)
+            res_temp = self.cursor.fetchall()
 
+            if len(res_temp) == 0:
+                res['status'] = False
+                res['data'] = "Нет заказов"
+            else:
+                res['status'] = True
+                res['data'] = res_temp
+
+        except (Exception, Error) as error:
+            print(error)
+            res['status'] = False
+            res['data'] = "Ошибка при выдачи таблицы"
+
+        finally:
+            self.close_connection()
+            return res
+
+    def create_new_service(self, name, description, time_work):
+        res = dict()
+        try:
+            self.connect()
+            str_exec = f"SELECT EXISTS (SELECT * FROM service" \
+                       f" WHERE name = '{name}');"
+            self.cursor.execute(str_exec)
+
+            if self.cursor.fetchone()[0]:
+                res['status'] = False
+                res['message'] = "Такая услуга существует"
+            else:
+                str_exec = ""
+                str_exec = str_exec + f'INSERT INTO service (name, description, time_work) ' \
+                                      f" VALUES ('{name}', '{description}', '{time_work}');"
+
+                self.cursor.execute(str_exec)
+                self.connection.commit()
+
+                # если все удачно, то запоминаем результат
+                res['status'] = True
+                res['message'] = "Услуга создана"
+
+        except (Exception, Error) as error:
+            print(error)
+            res['status'] = False
+            res['message'] = "Ошибка при создание услуги"
+
+        finally:
+            self.close_connection()
+            return res
+
+    def create_new_price(self, name_service, price, name_company, address):
+        res = dict()
+        try:
+            self.connect()
+            str_exec = f"SELECT EXISTS (SELECT * FROM prices" \
+                       f" WHERE name_service = '{name_service}' AND" \
+                       f" name_company = '{name_company}' AND" \
+                       f" address = '{address}');"
+            self.cursor.execute(str_exec)
+
+            if self.cursor.fetchone()[0]:
+                str_exec = f"UPDATE prices SET price = {price}" \
+                           f" WHERE name_service = '{name_service}' AND" \
+                           f" name_company = '{name_company}' AND" \
+                           f" address = '{address}';"
+                self.cursor.execute(str_exec)
+                self.connection.commit()
+                res['status'] = True
+                res['message'] = "Услуга обновлена"
+
+            else:
+                str_exec = ""
+                str_exec = str_exec + f'INSERT INTO prices (price, name_service, name_company, address) ' \
+                                      f" VALUES ('{price}', '{name_service}', '{name_company}', '{address}');"
+
+                self.cursor.execute(str_exec)
+                self.connection.commit()
+
+                # если все удачно, то запоминаем результат
+                res['status'] = True
+                res['message'] = "Услуга добавлена"
+
+        except (Exception, Error) as error:
+            print(error)
+            res['status'] = False
+            res['message'] = "Ошибка при создание услуги"
+
+        finally:
+            self.close_connection()
+            return res
+
+    def list_company_prices(self, name_company, address):
+        # выводим всех неподтвержденных пользователей
+        res = dict()
+        try:
+            self.connect()
+            str_exec = f"SELECT name_service, price " \
+                       f" FROM prices " \
+                       f" WHERE name_company ='{name_company}' AND address ='{address}';"
+            self.cursor.execute(str_exec)
+            res_temp = self.cursor.fetchall()
+
+            if len(res_temp) == 0:
+                res['status'] = False
+                res['data'] = "Нет услуг"
+            else:
+                res['status'] = True
+                res['data'] = res_temp
+
+        except (Exception, Error) as error:
+            print(error)
+            res['status'] = False
+            res['data'] = "Ошибка при выдачи таблицы"
+
+        finally:
+            self.close_connection()
+            return res

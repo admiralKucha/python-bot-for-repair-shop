@@ -62,6 +62,15 @@ class Company(StatesGroup):
     worker_password = State()
     # -Компания создает работника, пишет все его данные, придумывает логин и пароль
 
+    service_name = State()
+    service_description = State()
+    service_time_work = State()
+    # -Компания создает услугу, описывает ее
+
+    service_all = State()
+    service_price = State()
+    # -Компания добавляет услугу к себе в меню, описывая расценки
+
 
 class Customer(StatesGroup):
     account = State()
