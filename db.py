@@ -554,6 +554,36 @@ class PostgresDB:
             self.close_connection()
             return res
 
+    def delete_worker(self, name, address):
+        # выводим всех неподтвержденных пользователей
+        res = dict()
+        try:
+            self.connect()
+            str_exec = f"SELECT global_id " \
+                       f" FROM worker " \
+                       f" WHERE name ='{name}' AND address ='{address}';"
+            self.cursor.execute(str_exec)
+            res_temp = self.cursor.fetchone()
+
+            if res_temp is None:
+                res['status'] = False
+                res['data'] = "Такого пользователя нет"
+            else:
+                str_exec = f'DELETE FROM all_users WHERE id = {res_temp[0]} RETURNING id;'
+                self.cursor.execute(str_exec)
+                self.connection.commit()
+                res['status'] = True
+                res['data'] = "Аккаунт удален"
+
+        except (Exception, Error) as error:
+            print(error)
+            res['status'] = False
+            res['data'] = "Ошибка при удалении аккаунта"
+
+        finally:
+            self.close_connection()
+            return res
+
     def change_info_customer(self, key, value, name, address):
         res = dict()
         try:
@@ -646,6 +676,63 @@ class PostgresDB:
             print(error)
             res['status'] = False
             res['data'] = "Ошибка при выдачи таблицы"
+        finally:
+            self.close_connection()
+            return res
+
+    def change_info_worker(self, key, value, name, address, name_company, name_address):
+        res = dict()
+        try:
+            self.connect()
+            str_exec = f"SELECT EXISTS (SELECT * FROM worker" \
+                       f" WHERE name = '{name}' AND" \
+                       f" address = '{address}' AND" \
+                       f" name_company = '{name_company}' AND" \
+                       f" name_address = '{name_address}');"
+            self.cursor.execute(str_exec)
+
+            if self.cursor.fetchone()[0]:
+                str_exec = f"UPDATE worker SET {key} = '{value}'" \
+                           f" WHERE name = '{name}' AND" \
+                           f" address = '{address}' AND" \
+                           f" name_company = '{name_company}' AND" \
+                           f" name_address = '{name_address}');"
+                self.cursor.execute(str_exec)
+                self.connection.commit()
+                res['status'] = True
+                res['message'] = "Информация обновлена"
+
+            else:
+                res['status'] = False
+                res['message'] = "Такого пользователя не существует"
+
+        except (Exception, Error) as error:
+            print(error)
+            res['status'] = False
+            res['message'] = "Ошибка при изменение пользователя"
+
+        finally:
+            self.close_connection()
+            return res
+
+    def delete_order(self, name_company, address, data):
+        # выводим всех неподтвержденных пользователей
+        res = dict()
+        try:
+            self.connect()
+            str_exec = f"DELETE FROM orders WHERE name_customer = '{data[0]}' AND" \
+                       f" address_customer = '{data[1]}' AND name_service = '{data[2]}' AND " \
+                       f" name_company = '{name_company}' AND name_address = '{address}';"
+            self.cursor.execute(str_exec)
+            self.connection.commit()
+            res['status'] = True
+            res['data'] = "Заказ выполнен"
+
+        except (Exception, Error) as error:
+            print(error)
+            res['status'] = False
+            res['data'] = "Произошла ошибка"
+
         finally:
             self.close_connection()
             return res
