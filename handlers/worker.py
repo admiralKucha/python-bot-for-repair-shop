@@ -86,8 +86,8 @@ async def account_company_service(message: types.Message, state: FSMContext):
         await message.answer("Имя заказчика, Адрес заказчика, Название услуги")
         i = 0
         for el in data:
+            await message.answer(f"/{i} " + ", ".join(el))
             i = i + 1
-            await message.answer(f"/{i}" + ", ".join(el))
 
         await message.answer("Выберите заказ")
 

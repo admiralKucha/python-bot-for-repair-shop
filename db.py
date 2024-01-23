@@ -696,7 +696,7 @@ class PostgresDB:
                            f" WHERE name = '{name}' AND" \
                            f" address = '{address}' AND" \
                            f" name_company = '{name_company}' AND" \
-                           f" name_address = '{name_address}');"
+                           f" name_address = '{name_address}';"
                 self.cursor.execute(str_exec)
                 self.connection.commit()
                 res['status'] = True

@@ -74,7 +74,7 @@ async def account_company_service(message: types.Message, state: FSMContext):
 async def account_company_service(message: types.Message, state: FSMContext):
     await message.answer("Что желаете сделать?\n"
                          "/all_orders - посмотреть свои заказы\n"
-                         "/create_service - создать новую услугу\n"
+                         "/create_service - создать новый заказ\n"
                          "/exit - выйти из аккаунта")
 
 

@@ -65,5 +65,5 @@ async def input_password(message: types.Message, state: FSMContext):
                 await message.answer("Вы вошли в свой аккаунт\n"
                                      "Что желаете сделать?\n"
                                      "/info - посмотреть свои данные\n"
-                                     "/orders - посмотреть заказы\n"
+                                     "/do_order - посмотреть заказы\n"
                                      "/exit - выйти из аккаунта")
