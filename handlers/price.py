@@ -16,9 +16,10 @@ async def show_list_service(message: types.Message, state: FSMContext):
         data = res_temp['data']
         string = ""
         for el in data:
-            string = string + "/" + str(el) + '\n'
+            string = string + str(el[0]) + '\n'
         string = string + "/exit"
         await message.answer(string)
+        await message.answer("Чтобы выбрать, напишите")
     else:
         await message.answer(res_temp['data'])
 
@@ -37,8 +38,8 @@ async def show_non_auth_prices(message: types.Message):
         data = res_temp['data']
         string = ""
         for el in data:
-            string = string + f"Компания {str(el[0])} представляет {str(message.text)} за {str(el[1])} " + '\n'
+            string = string + f"Компания {str(el[0])} по адресу {str(el[1])}   представляет {str(message.text)} за {str(el[2])} " + '\n'
         string = string + "/exit"
-        return string
+        await message.answer(string)
     else:
-        return res_temp['data']
+        await message(res_temp['data'])

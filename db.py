@@ -166,14 +166,15 @@ class PostgresDB:
         res = dict()
         try:
             self.connect()
-            str_exec = f"SELECT * FROM {table};"
-            self.cursor.execute(str_exec)
-            res_values = self.cursor.fetchall()
 
             str_exec = f"SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{table}';"
             self.cursor.execute(str_exec)
             res_columns = self.cursor.fetchall()
             res_columns = [el[0] for el in res_columns]
+
+            str_exec = f"SELECT {', '.join(res_columns)} FROM {table};"
+            self.cursor.execute(str_exec)
+            res_values = self.cursor.fetchall()
 
             if len(res_values) == 0:
                 res['status'] = False
@@ -209,17 +210,18 @@ class PostgresDB:
                 case "1":
                     str_exec = f"SELECT name, address" \
                                f" FROM customer" \
-                               f" WHERE global_id = '{res_values[1]}';"
+                               f" WHERE global_id = {res_values[1]};"
                 case "2":
                     str_exec = f"SELECT name, address" \
                                f" FROM company" \
-                               f" WHERE global_id = '{res_values[1]}';"
+                               f" WHERE global_id = {res_values[1]};"
                 case "3":
                     str_exec = f"SELECT name, address, name_company, name_address" \
                                f" FROM worker" \
-                               f" WHERE global_id = '{res_values[1]}';"
+                               f" WHERE global_id = {res_values[1]};"
             self.cursor.execute(str_exec)
             res_values[1] = self.cursor.fetchone()
+            print(res_values)
             if res_values is None:
                 res['status'] = False
                 res['data'] = "Пользователь не найден"
@@ -288,7 +290,7 @@ class PostgresDB:
         res = dict()
         try:
             self.connect()
-            str_exec = f"SELECT name_company, price FROM prices WHERE name_service ='{service}';"
+            str_exec = f"SELECT name_company, address, price FROM prices WHERE name_service = '{service}';"
             self.cursor.execute(str_exec)
             res_temp = self.cursor.fetchall()
             if len(res_temp) == 0:
@@ -299,6 +301,7 @@ class PostgresDB:
                 res['data'] = res_temp
 
         except (Exception, Error) as error:
+            print(error)
             res['status'] = False
             res['data'] = "Ошибка при выдачи таблицы"
 
@@ -517,6 +520,132 @@ class PostgresDB:
             res['status'] = False
             res['message'] = "Ошибка при создание услуги"
 
+        finally:
+            self.close_connection()
+            return res
+
+    def delete_customer(self, name, address):
+        # выводим всех неподтвержденных пользователей
+        res = dict()
+        try:
+            self.connect()
+            str_exec = f"SELECT global_id " \
+                       f" FROM customer " \
+                       f" WHERE name ='{name}' AND address ='{address}';"
+            self.cursor.execute(str_exec)
+            res_temp = self.cursor.fetchone()
+
+            if res_temp is None:
+                res['status'] = False
+                res['data'] = "Такого пользователя нет"
+            else:
+                str_exec = f'DELETE FROM all_users WHERE id = {res_temp[0]} RETURNING id;'
+                self.cursor.execute(str_exec)
+                self.connection.commit()
+                res['status'] = True
+                res['data'] = "Аккаунт удален"
+
+        except (Exception, Error) as error:
+            print(error)
+            res['status'] = False
+            res['data'] = "Ошибка при удалении аккаунта"
+
+        finally:
+            self.close_connection()
+            return res
+
+    def change_info_customer(self, key, value, name, address):
+        res = dict()
+        try:
+            self.connect()
+            str_exec = f"SELECT EXISTS (SELECT * FROM customer" \
+                       f" WHERE name = '{name}' AND" \
+                       f" address = '{address}');"
+            self.cursor.execute(str_exec)
+
+            if self.cursor.fetchone()[0]:
+                str_exec = f"UPDATE customer SET {key} = '{value}'" \
+                       f" WHERE name = '{name}' AND" \
+                       f" address = '{address}';"
+                self.cursor.execute(str_exec)
+                self.connection.commit()
+                res['status'] = True
+                res['message'] = "Информация обновлена"
+
+            else:
+                res['status'] = False
+                res['message'] = "Такого пользователя не существует"
+
+        except (Exception, Error) as error:
+            print(error)
+            res['status'] = False
+            res['message'] = "Ошибка при изменение пользователя"
+
+        finally:
+            self.close_connection()
+            return res
+
+    def create_order(self, name_customer, address_customer, name_service, company):
+        res = dict()
+        try:
+            self.connect()
+            str_exec = f"SELECT EXISTS (SELECT * FROM orders" \
+                       f" WHERE name_customer = '{name_customer}' AND" \
+                       f" address_customer = '{address_customer}' AND" \
+                       f" name_service = '{name_service}' AND" \
+                       f" name_company = '{company[0]}' AND" \
+                       f" name_address = '{company[1]}');"
+            self.cursor.execute(str_exec)
+
+            if self.cursor.fetchone()[0]:
+                res['status'] = False
+                res['message'] = "Такой заказ уже есть"
+
+            else:
+                str_exec = ""
+                str_exec = str_exec + f'INSERT INTO orders (name_customer, address_customer,' \
+                                      f' name_service, name_company, name_address) ' \
+                                      f" VALUES ('{name_customer}', '{address_customer}', '{name_service}'," \
+                                      f" '{company[0]}', '{company[1]}');"
+
+                self.cursor.execute(str_exec)
+                self.connection.commit()
+
+                # если все удачно, то запоминаем результат
+                res['status'] = True
+                res['message'] = "Заказ добавлен"
+
+        except (Exception, Error) as error:
+            print(error)
+            res['status'] = False
+            res['message'] = "Ошибка при создание заказа"
+
+        finally:
+            self.close_connection()
+            return res
+
+    def list_of_orders_for_customer(self, name_customer, address_customer):
+        # выводим всех неподтвержденных пользователей
+        res = dict()
+        try:
+            self.connect()
+            str_exec = f"SELECT name_service, name_company, name_address " \
+                       f" FROM orders " \
+                       f" WHERE name_customer ='{name_customer}' AND address_customer ='{address_customer}';"
+            self.cursor.execute(str_exec)
+            res_temp = self.cursor.fetchall()
+
+            if len(res_temp) == 0:
+                res['status'] = False
+                res['data'] = "Нет заказов"
+            else:
+                res['status'] = True
+                res['data'] = res_temp
+
+        except (Exception, Error) as error:
+            print(error)
+            res['status'] = False
+            res['data'] = "Ошибка при выдачи таблицы"
         finally:
             self.close_connection()
             return res

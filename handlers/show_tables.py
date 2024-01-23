@@ -15,10 +15,9 @@ async def choose_table(message: types.Message, state: FSMContext):
                          "/2 company\n"
                          "/3 customer\n"
                          "/4 orders\n"
-                         "/5 pages\n"
-                         "/6 prices\n"
-                         "/7 service\n"
-                         "/8 worker\n"
+                         "/5 prices\n"
+                         "/6 service\n"
+                         "/7 worker\n"
                          "/exit")
 
     await state.set_state(Tables.choose_table)
@@ -45,12 +44,10 @@ async def show_table(message: types.Message, state: FSMContext):
         case "/4":
             text = "orders"
         case "/5":
-            text = "pages"
-        case "/6":
             text = "prices"
-        case "/7":
+        case "/6":
             text = "service"
-        case "/8":
+        case "/7":
             text = "worker"
 
     if text == "error":
@@ -74,10 +71,9 @@ async def show_table(message: types.Message, state: FSMContext):
                          "/2 company\n"
                          "/3 customer\n"
                          "/4 orders\n"
-                         "/5 pages\n"
-                         "/6 prices\n"
-                         "/7 service\n"
-                         "/8 worker\n"
+                         "/5 prices\n"
+                         "/6 service\n"
+                         "/7 worker\n"
                          "/exit")
 
 

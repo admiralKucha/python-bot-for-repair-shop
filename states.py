@@ -80,6 +80,13 @@ class Customer(StatesGroup):
     account = State()
     # -Человек зашел в свой аккаунт и теперь имеет больше функций в зависимости от своей роли
 
+    change_info = State()
+    change_info_put_value = State()
+    # -Заказчик изменяет информацию о себе
+
+    choose_orders = State()
+    choose_company = State()
+    # -Заказчик оформляет заказ
 
 class Worker(StatesGroup):
     account = State()
